@@ -176,7 +176,8 @@ class AppUi(tk.Tk):
         xlsx_out_filepath = asksaveasfilename(title=asksavefile_title,
                                               initialdir=xlsx_out_filename.parent,
                                               initialfile=xlsx_out_filename.stem,
-                                              filetypes=asksavefile_filetypes)
+                                              filetypes=asksavefile_filetypes,
+                                              defaultextension='.xlsx')
         if xlsx_out_filepath:
             command = 'write_xls'
             cmd_args = (self.alarms, plc_name, xlsx_out_filepath)
