@@ -55,24 +55,36 @@ class AppUi(tk.Tk):
         # Import source ComboBox
         frame = ttk.Frame(self.main_frm)
         label = ttk.Label(frame, text="Import symbols from: ")
-        label.grid(row=0, column=0)
+        label.grid(row=0, column=0, sticky="E")
         self.src_type_combobox = ttk.Combobox(frame, values=[src.full_name for src in supported_import_sources])
         self.src_type_combobox.state(["readonly"])
         self.src_type_combobox.grid(row=0, column=1)
-        self._select_last_import_source_used()
 
-        # Import button
-        import_button = tk.Button(frame, text='Import', command=self.on_click_import_button)
-        import_button.grid(row=0, column=2, padx=10)
+        # PLC name entry
+        label = ttk.Label(frame, text="PLC name: ")
+        label.grid(row=1, column=0, sticky="E")
+        self.plc_name_entry_text = tk.StringVar()
+        plc_name_entry = tk.Entry(frame, textvariable=self.plc_name_entry_text)
+        plc_name_entry.grid(row=1, column=1, pady=5, sticky="W")
 
         frame.pack()
 
+        buttons_frame = ttk.Frame(self.main_frm)
+
+        # Import button
+        import_button = tk.Button(buttons_frame, text='Import', command=self.on_click_import_button)
+        import_button.grid(row=0, column=0)
+
         # Save button
-        self.save_button = tk.Button(self.main_frm, text='Save', command=self.on_click_save_button)
-        self.save_button.pack(pady=10)
+        self.save_button = tk.Button(buttons_frame, text='Save', command=self.on_click_save_button)
+        self.save_button.grid(row=0, column=1, padx=20)
         self.save_button["state"] = "disabled"
 
+        buttons_frame.pack(pady=10)
+
         self.status_bar = StatusBar(self.main_frm)
+
+        self.load_from_settings()
 
         self.main_frm.pack(fill=tk.BOTH, expand=True)
 
@@ -149,6 +161,14 @@ class AppUi(tk.Tk):
         self.task_queue.put(task)
 
     def on_click_save_button(self):
+        plc_name = self.plc_name_entry_text.get()
+        if plc_name:
+            self.settings.set('general', 'plc_name', plc_name)
+        else:
+            messagebox.showerror("PLC name is missing",
+                                 "Please enter a PLC name value")
+            return
+
         xlsx_out_filename = Path(self.import_filepath).with_suffix('.xlsx')
         asksavefile_title = "Please choose a filename to save the alarms on"
         asksavefile_filetypes = [('XLSX files', '.xlsx')]
@@ -159,7 +179,7 @@ class AppUi(tk.Tk):
                                               filetypes=asksavefile_filetypes)
         if xlsx_out_filepath:
             command = 'write_xls'
-            cmd_args = (self.alarms, xlsx_out_filepath)
+            cmd_args = (self.alarms, plc_name, xlsx_out_filepath)
             task = (command, cmd_args)
             self.task_queue.put(task)
 
@@ -173,6 +193,10 @@ class AppUi(tk.Tk):
             import_source = name_to_source.get(import_source_setting)
             if import_source:  # Make sure the value read from the setting is valid
                 self.src_type_combobox.set(import_source.full_name)
+
+    def load_from_settings(self):
+        self._select_last_import_source_used()
+        self.plc_name_entry_text.set(self.settings.get('general', 'plc_name', ''))
 
 
 if __name__ == '__main__':

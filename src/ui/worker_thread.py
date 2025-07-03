@@ -50,8 +50,9 @@ class WorkerThread(threading.Thread):
                     self.parse(import_source, symbols_filepath)
                 elif command == 'write_xls':
                     alarms = cmd_args[0]
-                    xlsx_filepath = cmd_args[1]
-                    write_xls_from_alarms(xlsx_filepath, alarms)
+                    plc_name = cmd_args[1]
+                    xlsx_filepath = cmd_args[2]
+                    write_xls_from_alarms(xlsx_filepath, plc_name, alarms)
                     self.result_queue.put(('write_xls_success', xlsx_filepath))
                 elif command == 'stop':
                     break

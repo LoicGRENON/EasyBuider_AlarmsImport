@@ -211,9 +211,7 @@ def write_headers(worksheet: Worksheet):
         worksheet.write(1, i, header)
 
 
-def get_row_data(category_id: int, symbol: Symbol):
-    # TODO: Use a parameter instead for plc_name
-    plc_name = "PZ_PLC"
+def get_row_data(category_id: int, plc_name: str, symbol: Symbol):
     address = symbol.name
     message = symbol.comment
 
@@ -412,32 +410,32 @@ def write_row(worksheet: Worksheet, row_id, row_data):
         worksheet.write(row_id, col_id, value)
 
 
-def write_rows_from_symbols(worksheet: Worksheet, symbols: List[Symbol]):
+def write_rows_from_symbols(worksheet: Worksheet, plc_name: str, symbols: List[Symbol]):
     row_id = 2  # Starts writing at row 3
     for symbol in symbols:
         category = find_matching_category(symbol, alarm_categories)
         if category:
-            row_data = get_row_data(category.id, symbol)
+            row_data = get_row_data(category.id, plc_name, symbol)
             write_row(worksheet, row_id, row_data)
             row_id += 1
 
-def write_rows_from_alarms(worksheet: Worksheet, alarms: List[Alarm]):
+def write_rows_from_alarms(worksheet: Worksheet, plc_name: str, alarms: List[Alarm]):
     row_id = 2  # Starts writing at row 3
     for alarm in alarms:
-        row_data = get_row_data(alarm.category.id, alarm.symbol)
+        row_data = get_row_data(alarm.category.id, plc_name, alarm.symbol)
         write_row(worksheet, row_id, row_data)
         row_id += 1
 
 
-def write_xls_from_symbols(fname: str, symbols: List[Symbol]):
+def write_xls_from_symbols(fname: str, plc_name: str, symbols: List[Symbol]):
     with xlsxwriter.Workbook(fname) as workbook:
         worksheet = workbook.add_worksheet()
         write_headers(worksheet)
-        write_rows_from_symbols(worksheet, symbols)
+        write_rows_from_symbols(worksheet, plc_name, symbols)
 
 
-def write_xls_from_alarms(fname: str, alarms: List[Alarm]):
+def write_xls_from_alarms(fname: str, plc_name: str, alarms: List[Alarm]):
     with xlsxwriter.Workbook(fname) as workbook:
         worksheet = workbook.add_worksheet()
         write_headers(worksheet)
-        write_rows_from_alarms(worksheet, alarms)
+        write_rows_from_alarms(worksheet, plc_name, alarms)
