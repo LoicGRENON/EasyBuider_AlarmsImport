@@ -21,5 +21,5 @@
 # SOFTWARE.
 #
 
-__version__ = '0.2.0b'
+__version__ = '0.2.0'
 APP_NAME = "EasyBuilder_AlarmsImport"
