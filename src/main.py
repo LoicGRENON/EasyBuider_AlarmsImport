@@ -9,6 +9,7 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 from src import __version__
 from import_source import ImportSource
 from settings_manager import SettingsManager
+from ui import CategoriesSettingsDialog
 from ui import StatusBar
 from ui import WorkerThread
 
@@ -66,6 +67,12 @@ class AppUi(tk.Tk):
         self.plc_name_entry_text = tk.StringVar()
         plc_name_entry = tk.Entry(frame, textvariable=self.plc_name_entry_text)
         plc_name_entry.grid(row=1, column=1, pady=5, sticky="W")
+
+        # Categories
+        label = ttk.Label(frame, text="Categories: ")
+        label.grid(row=2, column=0, sticky="E")
+        self.categories_button = tk.Button(frame, text="Define", command=self.open_categories_settings)
+        self.categories_button.grid(row=2, column=1, sticky="W")
 
         frame.pack()
 
@@ -199,8 +206,11 @@ class AppUi(tk.Tk):
         self._select_last_import_source_used()
         self.plc_name_entry_text.set(self.settings.get('general', 'plc_name', ''))
 
+    def open_categories_settings(self):
+        CategoriesSettingsDialog(self, settings_manager=self.settings)
+
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     main_app = AppUi()
     main_app.mainloop()

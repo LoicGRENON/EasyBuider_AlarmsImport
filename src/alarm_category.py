@@ -4,9 +4,13 @@ from itertools import count
 from typing import Tuple
 
 
+def rgb_to_hex(red, green, blue):
+    return f'#{red:02x}{green:02x}{blue:02x}'
+
+
 @dataclass
 class AlarmCategory:
-    regex: str
+    regex: str = r''
     bg_color: Tuple[int, int, int] = (255,0,0) # Red
     font_color: Tuple[int, int, int] = (0,0,0) # Black
     id: int = field(default_factory=count().__next__)
@@ -18,3 +22,11 @@ class AlarmCategory:
 
     def is_match(self, symbol_name: str) -> bool:
         return self.pattern.search(symbol_name) is not None
+
+    @property
+    def bg_color_hex(self) -> str:
+        return rgb_to_hex(self.bg_color[0], self.bg_color[1], self.bg_color[2])
+
+    @property
+    def fg_color_hex(self) -> str:
+        return rgb_to_hex(self.font_color[0], self.font_color[1], self.font_color[2])
