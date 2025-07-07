@@ -100,6 +100,8 @@ class AppUi(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
+        # TODO: Add a menu to import/export the settings (or a subset of the settings)
+
     def __check_result_queue(self):
         try:
             while True:

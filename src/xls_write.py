@@ -215,7 +215,7 @@ def get_row_data(category_id: int, plc_name: str, symbol: Symbol):
     address = symbol.name
     message = symbol.comment
 
-    font_color = str(alarm_categories[category_id].font_color)
+    font_color = str(alarm_categories[category_id].fg_color)
     bg_color = str(alarm_categories[category_id].bg_color)
 
     return [

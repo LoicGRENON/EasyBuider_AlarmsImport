@@ -63,7 +63,7 @@ class CategoriesSettingsDialog(tk.Toplevel):
             if color_type == BACKGROUND:
                 self.categories[row].alarm_category.bg_color = rgb_color
             elif color_type == FOREGROUND:
-                self.categories[row].alarm_category.font_color = rgb_color
+                self.categories[row].alarm_category.fg_color = rgb_color
 
             # Update button color
             button.configure(bg=html_color)
@@ -74,7 +74,7 @@ class CategoriesSettingsDialog(tk.Toplevel):
                 'name': category.name,
                 'filter': category.alarm_category.regex,
                 'bg_color': category.alarm_category.bg_color,
-                'fg_color': category.alarm_category.font_color
+                'fg_color': category.alarm_category.fg_color
             }
             self.settings_manager.set('Categories', str(category_id), json.dumps(category_settings))
 
@@ -122,7 +122,7 @@ class CategoriesSettingsDialog(tk.Toplevel):
                     name=settings_json['name'],
                     regex=settings_json['filter'],
                     bg_color=settings_json['bg_color'],
-                    font_color=settings_json['fg_color'],
+                    fg_color=settings_json['fg_color'],
                 )
             )
         return categories_settings

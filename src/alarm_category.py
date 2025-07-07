@@ -12,7 +12,7 @@ def rgb_to_hex(red, green, blue):
 class AlarmCategory:
     regex: str = r''
     bg_color: Tuple[int, int, int] = (255,0,0) # Red
-    font_color: Tuple[int, int, int] = (0,0,0) # Black
+    fg_color: Tuple[int, int, int] = (0, 0, 0) # Black
     id: int = field(default_factory=count().__next__)
 
     pattern: re.Pattern = field(init=False, repr=False)
@@ -29,4 +29,4 @@ class AlarmCategory:
 
     @property
     def fg_color_hex(self) -> str:
-        return rgb_to_hex(self.font_color[0], self.font_color[1], self.font_color[2])
+        return rgb_to_hex(self.fg_color[0], self.fg_color[1], self.fg_color[2])
