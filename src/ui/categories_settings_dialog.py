@@ -54,8 +54,15 @@ class CategoriesSettingsDialog(tk.Toplevel):
         return self._categories_copy
 
     def choose_color(self, button, row, color_type):
-        color_type_str = 'foreground' if  color_type == FOREGROUND else 'background'
-        (rgb_color, html_color) = colorchooser.askcolor(title=f"Choose {color_type_str} color for category #{row:0{3}}")
+        if color_type == FOREGROUND:
+            color_type_str = 'foreground'
+            default_color = tuple(self.categories[row].alarm_category.fg_color)
+        else:
+            color_type_str = 'background'
+            default_color = tuple(self.categories[row].alarm_category.bg_color)
+
+        (rgb_color, html_color) = colorchooser.askcolor(color=default_color,
+                                                        title=f"Choose {color_type_str} color for category #{row:0{3}}")
         if html_color:
             if color_type == BACKGROUND:
                 self.categories[row].alarm_category.bg_color = rgb_color
