@@ -1,5 +1,6 @@
 import configparser
 import logging
+import shutil
 from platformdirs import user_config_dir
 from pathlib import Path
 
@@ -31,6 +32,13 @@ class SettingsManager:
         self.config['general'] = {
             'import_source': ''
         }
+
+    def export_to(self, filename):
+        shutil.copyfile(self.config_file, filename)
+
+    def import_from(self, filename):
+        shutil.copyfile(filename, self.config_file)
+        self.__init__()
 
     def get(self, section: str, key: str, fallback=None):
         return self.config.get(section, key, fallback=fallback)

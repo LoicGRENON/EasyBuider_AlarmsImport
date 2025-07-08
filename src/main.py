@@ -7,7 +7,7 @@ from tkinter import messagebox
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
-from src import __version__
+from src import __version__, APP_NAME
 from category_settings import CategorySettings
 from import_source import ImportSource
 from settings_manager import SettingsManager
@@ -43,10 +43,12 @@ class AppUi(tk.Tk):
         self.worker.start()
 
         self.settings = SettingsManager()
-        self.categories_settings = self.get_categories_settings()
+        self.categories_settings = None
 
         self.title(f"EasyBuilder Alarms Import - V{__version__}")
         self.minsize(200, 100)
+        self.add_menu_bar()
+
         self.main_frm = ttk.Frame(self, padding=10)
 
         label = ttk.Label(
@@ -103,8 +105,6 @@ class AppUi(tk.Tk):
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-        # TODO: Add a menu to import/export the settings (or a subset of the settings)
-
     def __check_result_queue(self):
         try:
             while True:
@@ -122,6 +122,48 @@ class AppUi(tk.Tk):
             pass
         # Schedule another call after 100ms
         self.after(100, self.__check_result_queue)
+
+    def add_menu_bar(self):
+        menu_bar = tk.Menu(self)
+
+        menu_file = tk.Menu(menu_bar, tearoff=0)
+        menu_file.add_command(label="Import settings", command=self.do_import_settings)
+        menu_file.add_command(label="Export settings", command=self.do_export_settings)
+        menu_file.add_separator()
+        menu_file.add_command(label="Exit", command=self.on_closing)
+        menu_bar.add_cascade(label="File", menu=menu_file)
+
+        menu_help = tk.Menu(menu_bar, tearoff=0)
+        menu_help.add_command(label="About", command=self.do_about)
+        menu_bar.add_cascade(label="Help", menu=menu_help)
+
+        self.config(menu=menu_bar)
+
+    def do_about(self):
+        content = (f"{APP_NAME}\n"
+                   f"\n"
+                   f"Version {__version__}\n"
+                   f"Copyright © 2025 GRENON Loïc\n"
+                   f"\n"
+                   f"Follow on GitHub: https://github.com/LoicGRENON/EasyBuider_AlarmsImport")
+        tk.messagebox.showinfo(f"About {APP_NAME}", content)
+
+    def do_import_settings(self):
+        askopenfile_title = "Please choose the file you want to import the settings from"
+        askopenfile_filetypes = [('ini files', '.ini'), ('All files', '.*')]
+        import_filepath = askopenfilename(title=askopenfile_title, filetypes=askopenfile_filetypes)
+        if import_filepath:
+            self.settings.import_from(import_filepath)
+            self.load_from_settings()
+
+    def do_export_settings(self):
+        asksavefile_title = "Please choose a filename to save the settings on"
+        asksavefile_filetypes = [('ini files', '.ini'), ('All files', '.*')]
+        settings_filepath = asksaveasfilename(title=asksavefile_title,
+                                              filetypes=asksavefile_filetypes,
+                                              defaultextension='.ini')
+        if settings_filepath:
+            self.settings.export_to(settings_filepath)
 
     def on_closing(self):
         """
@@ -210,6 +252,7 @@ class AppUi(tk.Tk):
     def load_from_settings(self):
         self._select_last_import_source_used()
         self.plc_name_entry_text.set(self.settings.get('general', 'plc_name', ''))
+        self.categories_settings = self.get_categories_settings()
 
     def get_categories_settings(self):
         categories_settings = []
