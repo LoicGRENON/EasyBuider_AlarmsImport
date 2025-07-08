@@ -18,7 +18,8 @@ class AlarmCategory:
     pattern: re.Pattern = field(init=False, repr=False)
 
     def __post_init__(self):
-        self.pattern = re.compile(self.regex)
+        # Avoid using '' as default regexp as it matches everything ... Use '^$' to match nothing
+        self.pattern = re.compile(self.regex if self.regex != '' else r'^$')
 
     def is_match(self, symbol_name: str) -> bool:
         return self.pattern.search(symbol_name) is not None

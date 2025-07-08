@@ -7,9 +7,8 @@ from tkinter import colorchooser
 from tkinter import ttk
 from tkinter.messagebox import askyesno
 
-from src.alarm_category import AlarmCategory
 from .scrollable_frame import ScrollableFrame
-
+from src.category_settings import CategorySettings
 
 BACKGROUND = 1
 FOREGROUND = 2
@@ -18,17 +17,12 @@ FOREGROUND = 2
 logger = logging.getLogger(__name__)
 
 
-class CategorySettings:
-    def __init__(self, name='', **kwargs):
-        self.name = name
-        self.alarm_category = AlarmCategory(**kwargs)
-
-
 class CategoriesSettingsDialog(tk.Toplevel):
 
-    def __init__(self, master, settings_manager, **kwargs):
+    def __init__(self, master, categories_settings, settings_manager, **kwargs):
         super().__init__(master, **kwargs)
         self.master = master
+        self.categories = categories_settings
         self.settings_manager = settings_manager
 
         self.title(f'Categories settings')
@@ -38,7 +32,6 @@ class CategoriesSettingsDialog(tk.Toplevel):
         # Make dialog modal
         self.grab_set()
 
-        self.categories = self.get_current_settings()
         # Used to check for modifications by serialization
         self._categories_copy = copy.deepcopy(self.categories)
 
@@ -55,6 +48,10 @@ class CategoriesSettingsDialog(tk.Toplevel):
         main_frm.pack(fill='both', expand=True)
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
+
+    @property
+    def categories_settings(self):
+        return self._categories_copy
 
     def choose_color(self, button, row, color_type):
         color_type_str = 'foreground' if  color_type == FOREGROUND else 'background'
@@ -90,7 +87,9 @@ class CategoriesSettingsDialog(tk.Toplevel):
         answer = False
         no_modifications_done = pickle.dumps(self._categories_copy) == pickle.dumps(self.categories)
         if not no_modifications_done:
-            answer = askyesno(title="Unsaved changes", message="Some changes are not saved .Are you want to exit ?")
+            answer = askyesno(title="Unsaved changes",
+                              message="Some changes are not saved.\nAre sure you want to exit ?",
+                              default="no")
 
         if no_modifications_done or answer:
             self.destroy()
@@ -104,28 +103,6 @@ class CategoriesSettingsDialog(tk.Toplevel):
         text = widget.get()
         self.categories[row].name = text
         logger.debug(f'Category row {row} name set to "{text}"')
-
-    def get_current_settings(self):
-        categories_settings = []
-        for category_id in range(256):
-            category_settings = self.settings_manager.get('Categories', str(category_id), None)
-            if not category_settings:
-                category_settings = json.dumps({
-                    'name': '',
-                    'filter': '',
-                    'bg_color': [255, 0, 0],
-                    'fg_color': [0, 0, 0]
-                })
-            settings_json = json.loads(category_settings)
-            categories_settings.append(
-                CategorySettings(
-                    name=settings_json['name'],
-                    regex=settings_json['filter'],
-                    bg_color=settings_json['bg_color'],
-                    fg_color=settings_json['fg_color'],
-                )
-            )
-        return categories_settings
 
     def show_category(self, parent_frame, row: int, category: CategorySettings):
         category_frm = ttk.Frame(parent_frame)

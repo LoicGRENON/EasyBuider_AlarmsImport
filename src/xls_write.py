@@ -4,19 +4,10 @@ from typing import List
 from xlsxwriter.worksheet import Worksheet
 
 from alarm import Alarm
-from alarm_category import AlarmCategory
+from category_settings import CategorySettings
 from symbol import Symbol
 
 logger = logging.getLogger(__name__)
-
-
-alarm_categories = [
-    AlarmCategory(r'stS\d+DefImdt\w*\.', (165,42,42), (0,0,0)),
-    AlarmCategory(r'stS\d+DefFcy\w*\.', (165,42,42), (0,0,0)),
-    AlarmCategory(r'stS\d+DefAttente\w*\.', (0,0,255), (255,255,255)),
-    AlarmCategory(r'stS\d+Avert\w*\.', (255,215,0), (0,0,0)),
-    AlarmCategory(r'stS\d+Message\w*\.', (0,0,255), (255,255,255)),
-]
 
 
 def write_headers(worksheet: Worksheet):
@@ -211,12 +202,12 @@ def write_headers(worksheet: Worksheet):
         worksheet.write(1, i, header)
 
 
-def get_row_data(category_id: int, plc_name: str, symbol: Symbol):
+def get_row_data(category_id: int, plc_name: str, symbol: Symbol, categories_settings: List[CategorySettings]):
     address = symbol.name
     message = symbol.comment
 
-    font_color = str(alarm_categories[category_id].fg_color)
-    bg_color = str(alarm_categories[category_id].bg_color)
+    font_color = str(categories_settings[category_id].alarm_category.fg_color)
+    bg_color = str(categories_settings[category_id].alarm_category.bg_color)
 
     return [
         f"{category_id}: Category {category_id}",   # Catégorie
@@ -401,41 +392,21 @@ def get_row_data(category_id: int, plc_name: str, symbol: Symbol):
     ]
 
 
-def find_matching_category(symbol: Symbol, categories: List[AlarmCategory]):
-    return next((cat for cat in categories if cat.is_match(symbol.name)), None)
-
-
 def write_row(worksheet: Worksheet, row_id, row_data):
     for col_id, value in enumerate(row_data):
         worksheet.write(row_id, col_id, value)
 
 
-def write_rows_from_symbols(worksheet: Worksheet, plc_name: str, symbols: List[Symbol]):
-    row_id = 2  # Starts writing at row 3
-    for symbol in symbols:
-        category = find_matching_category(symbol, alarm_categories)
-        if category:
-            row_data = get_row_data(category.id, plc_name, symbol)
-            write_row(worksheet, row_id, row_data)
-            row_id += 1
-
-def write_rows_from_alarms(worksheet: Worksheet, plc_name: str, alarms: List[Alarm]):
+def write_rows_from_alarms(worksheet: Worksheet, plc_name: str, alarms: List[Alarm], categories_settings: List[CategorySettings]):
     row_id = 2  # Starts writing at row 3
     for alarm in alarms:
-        row_data = get_row_data(alarm.category.id, plc_name, alarm.symbol)
+        row_data = get_row_data(alarm.category.id, plc_name, alarm.symbol, categories_settings)
         write_row(worksheet, row_id, row_data)
         row_id += 1
 
 
-def write_xls_from_symbols(fname: str, plc_name: str, symbols: List[Symbol]):
+def write_xls_from_alarms(fname: str, plc_name: str, alarms: List[Alarm], categories_settings: List[CategorySettings]):
     with xlsxwriter.Workbook(fname) as workbook:
         worksheet = workbook.add_worksheet()
         write_headers(worksheet)
-        write_rows_from_symbols(worksheet, plc_name, symbols)
-
-
-def write_xls_from_alarms(fname: str, plc_name: str, alarms: List[Alarm]):
-    with xlsxwriter.Workbook(fname) as workbook:
-        worksheet = workbook.add_worksheet()
-        write_headers(worksheet)
-        write_rows_from_alarms(worksheet, plc_name, alarms)
+        write_rows_from_alarms(worksheet, plc_name, alarms, categories_settings)

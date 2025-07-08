@@ -1,3 +1,4 @@
+import json
 import logging
 import queue
 import tkinter as tk
@@ -7,6 +8,7 @@ from tkinter import ttk
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 from src import __version__
+from category_settings import CategorySettings
 from import_source import ImportSource
 from settings_manager import SettingsManager
 from ui import CategoriesSettingsDialog
@@ -41,6 +43,7 @@ class AppUi(tk.Tk):
         self.worker.start()
 
         self.settings = SettingsManager()
+        self.categories_settings = self.get_categories_settings()
 
         self.title(f"EasyBuilder Alarms Import - V{__version__}")
         self.minsize(200, 100)
@@ -165,7 +168,7 @@ class AppUi(tk.Tk):
 
         # Delegate the parsing to the worker thread
         command = 'parse'
-        cmd_args = (selected_source, self.import_filepath)
+        cmd_args = (selected_source, self.import_filepath, self.categories_settings)
         task = (command, cmd_args)
         self.task_queue.put(task)
 
@@ -189,7 +192,7 @@ class AppUi(tk.Tk):
                                               defaultextension='.xlsx')
         if xlsx_out_filepath:
             command = 'write_xls'
-            cmd_args = (self.alarms, plc_name, xlsx_out_filepath)
+            cmd_args = (self.alarms, plc_name, xlsx_out_filepath, self.categories_settings)
             task = (command, cmd_args)
             self.task_queue.put(task)
 
@@ -208,8 +211,34 @@ class AppUi(tk.Tk):
         self._select_last_import_source_used()
         self.plc_name_entry_text.set(self.settings.get('general', 'plc_name', ''))
 
+    def get_categories_settings(self):
+        categories_settings = []
+        for category_id in range(256):
+            category_settings = self.settings.get('Categories', str(category_id), None)
+            if not category_settings:
+                category_settings = json.dumps({
+                    'name': '',
+                    'filter': '',
+                    'bg_color': [255, 0, 0],
+                    'fg_color': [0, 0, 0]
+                })
+            settings_json = json.loads(category_settings)
+            categories_settings.append(
+                CategorySettings(
+                    name=settings_json['name'],
+                    regex=settings_json['filter'],
+                    bg_color=settings_json['bg_color'],
+                    fg_color=settings_json['fg_color'],
+                )
+            )
+        return categories_settings
+
     def open_categories_settings(self):
-        CategoriesSettingsDialog(self, settings_manager=self.settings)
+        popup = CategoriesSettingsDialog(self,
+                                         categories_settings=self.categories_settings,
+                                         settings_manager=self.settings)
+        popup.wait_window()
+        self.categories_settings = popup.categories_settings
 
 
 if __name__ == '__main__':
