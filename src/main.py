@@ -283,6 +283,6 @@ class AppUi(tk.Tk):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     main_app = AppUi()
     main_app.mainloop()
