@@ -206,8 +206,8 @@ def get_row_data(category_id: int, plc_name: str, symbol: Symbol, categories_set
     address = symbol.name
     message = symbol.comment
 
-    font_color = str(categories_settings[category_id].alarm_category.fg_color)
-    bg_color = str(categories_settings[category_id].alarm_category.bg_color)
+    font_color = ":".join(str(v) for v in categories_settings[category_id].alarm_category.fg_color)
+    bg_color = ":".join(str(v) for v in categories_settings[category_id].alarm_category.bg_color)
 
     return [
         f"{category_id}: Category {category_id}",   # Catégorie
