@@ -86,13 +86,16 @@ class CategoriesSettingsDialog(tk.Toplevel):
 
     def on_apply_change_button(self):
         for category_id, category in enumerate(self.categories):
-            category_settings = {
-                'name': category.name,
-                'filter': category.alarm_category.regex,
-                'bg_color': category.alarm_category.bg_color,
-                'fg_color': category.alarm_category.fg_color
-            }
-            self.settings_manager.set('Categories', str(category_id), json.dumps(category_settings))
+            # Save only changes
+            differences = pickle.dumps(self._categories_copy[category_id]) != pickle.dumps(self.categories[category_id])
+            if differences:
+                category_settings = {
+                    'name': category.name,
+                    'filter': category.alarm_category.regex,
+                    'bg_color': category.alarm_category.bg_color,
+                    'fg_color': category.alarm_category.fg_color
+                }
+                self.settings_manager.set('Categories', str(category_id), json.dumps(category_settings))
 
         # Used to check for modifications by serialization
         self._categories_copy = copy.deepcopy(self.categories)
