@@ -26,8 +26,8 @@ class CategoriesSettingsDialog(tk.Toplevel):
         self.settings_manager = settings_manager
 
         self.title(f'Categories settings')
-        self.minsize(300, 100)
-        self.geometry('680x400')
+        self.minsize(600, 200)
+        self.geometry('600x400')
 
         # Make dialog modal
         self.grab_set()
@@ -36,20 +36,20 @@ class CategoriesSettingsDialog(tk.Toplevel):
         self._categories_copy = copy.deepcopy(self.categories)
 
         main_frm = ttk.Frame(self, padding=10)
-
         frame = ScrollableFrame(main_frm)
         category_frm = ttk.Frame(frame.scrollable_frame)
 
         self.category_headings(category_frm)
+        self.name_entries = []
         for row, category in enumerate(self.categories, start=1):
             self.show_category(category_frm, row, category)
-        category_frm.pack()
-        frame.pack(fill='both', expand=True)
 
         button = tk.Button(main_frm, text='Apply changes', command=self.on_apply_change_button)
-        button.pack()
 
         main_frm.pack(fill='both', expand=True)
+        button.pack(side='bottom')
+        category_frm.pack()
+        frame.pack(fill='both', expand=True)
 
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -70,8 +70,10 @@ class CategoriesSettingsDialog(tk.Toplevel):
         if html_color:
             if color_type == BACKGROUND:
                 self.categories[row].alarm_category.bg_color = rgb_color
+                self.name_entries[row].configure(background=html_color)
             elif color_type == FOREGROUND:
                 self.categories[row].alarm_category.fg_color = rgb_color
+                self.name_entries[row].configure(foreground=html_color)
 
             # Update button color
             button.configure(bg=html_color)
@@ -127,8 +129,13 @@ class CategoriesSettingsDialog(tk.Toplevel):
 
         name_entry_text = tk.StringVar()
         name_entry_text.set(category.name)
-        name_entry = tk.Entry(parent_frame, textvariable=name_entry_text, width=25)
+        name_entry = tk.Entry(parent_frame,
+                              textvariable=name_entry_text,
+                              width=25,
+                              background=category.alarm_category.bg_color_hex,
+                              foreground=category.alarm_category.fg_color_hex)
         name_entry.bind('<KeyRelease>', lambda x: self.on_name_change(name_entry, row - 1))
+        self.name_entries.append(name_entry)
         name_entry.grid(row=row, column=1, padx=5, pady=5)
 
         filter_entry_text = tk.StringVar()

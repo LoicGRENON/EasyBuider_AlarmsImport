@@ -262,7 +262,7 @@ class AppUi(tk.Tk):
                 category_settings = json.dumps({
                     'name': '',
                     'filter': '',
-                    'bg_color': [255, 0, 0],
+                    'bg_color': [255, 255, 255],
                     'fg_color': [0, 0, 0]
                 })
             settings_json = json.loads(category_settings)
