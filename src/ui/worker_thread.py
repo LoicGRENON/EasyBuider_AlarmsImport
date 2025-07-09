@@ -61,7 +61,8 @@ class WorkerThread(threading.Thread):
         elif import_src.name == 'omron-sysmac':
             for line in open(symbols_filepath):
                 fields = line.strip().split('\t')
-                symbol = Symbol(name=fields[0], type=fields[1], comment=fields[3])
+                name = "VAR://" + fields[0]
+                symbol = Symbol(name=name, type=fields[1], comment=fields[3])
                 category = find_matching_category(symbol, alarm_categories)
                 if category:
                     alarms.append(Alarm(symbol=symbol, category=category))
