@@ -46,23 +46,18 @@ class AppUi(tk.Tk):
         self.categories_settings = None
 
         self.title(f"EasyBuilder Alarms Import - V{__version__}")
-        self.minsize(200, 100)
+        self.minsize(400, 150)
         self.add_menu_bar()
 
         self.main_frm = ttk.Frame(self, padding=10)
-
-        label = ttk.Label(
-            self.main_frm,
-            text="This application allows you to create a XLSX file "
-                 "to import alarms in Weintek (KEP) EasyBuilder Pro.\n"
-        )
-        label.pack(side=tk.TOP)
 
         # Import source ComboBox
         frame = ttk.Frame(self.main_frm)
         label = ttk.Label(frame, text="Import symbols from: ")
         label.grid(row=0, column=0, sticky="E")
-        self.src_type_combobox = ttk.Combobox(frame, values=[src.full_name for src in supported_import_sources])
+        self.src_type_combobox = ttk.Combobox(frame,
+                                              values=[src.full_name for src in supported_import_sources],
+                                              width=25)
         self.src_type_combobox.state(["readonly"])
         self.src_type_combobox.grid(row=0, column=1)
 
@@ -140,7 +135,10 @@ class AppUi(tk.Tk):
         self.config(menu=menu_bar)
 
     def do_about(self):
+        desc = "This application allows you to create a XLSX file to import alarms in Weintek (KEP) EasyBuilder Pro."
         content = (f"{APP_NAME}\n"
+                   f"\n"
+                   f"{desc}\n"
                    f"\n"
                    f"Version {__version__}\n"
                    f"Copyright © 2025 GRENON Loïc\n"
