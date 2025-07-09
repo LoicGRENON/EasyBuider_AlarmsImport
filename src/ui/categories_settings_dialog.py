@@ -38,8 +38,12 @@ class CategoriesSettingsDialog(tk.Toplevel):
         main_frm = ttk.Frame(self, padding=10)
 
         frame = ScrollableFrame(main_frm)
-        for row, category in enumerate(self.categories):
-            self.show_category(frame.scrollable_frame, row, category)
+        category_frm = ttk.Frame(frame.scrollable_frame)
+
+        self.category_headings(category_frm)
+        for row, category in enumerate(self.categories, start=1):
+            self.show_category(category_frm, row, category)
+        category_frm.pack()
         frame.pack(fill='both', expand=True)
 
         button = tk.Button(main_frm, text='Apply changes', command=self.on_apply_change_button)
@@ -56,10 +60,10 @@ class CategoriesSettingsDialog(tk.Toplevel):
     def choose_color(self, button, row, color_type):
         if color_type == FOREGROUND:
             color_type_str = 'foreground'
-            default_color = tuple(self.categories[row].alarm_category.fg_color)
+            default_color = self.categories[row].alarm_category.fg_color_hex
         else:
             color_type_str = 'background'
-            default_color = tuple(self.categories[row].alarm_category.bg_color)
+            default_color = self.categories[row].alarm_category.bg_color_hex
 
         (rgb_color, html_color) = colorchooser.askcolor(color=default_color,
                                                         title=f"Choose {color_type_str} color for category #{row:0{3}}")
@@ -71,6 +75,12 @@ class CategoriesSettingsDialog(tk.Toplevel):
 
             # Update button color
             button.configure(bg=html_color)
+
+    def category_headings(self, parent_frame):
+        ttk.Label(parent_frame, text="Name").grid(row=0, column=1)
+        ttk.Label(parent_frame, text="Filter").grid(row=0, column=2)
+        ttk.Label(parent_frame, text="Background").grid(row=0, column=3)
+        ttk.Label(parent_frame, text="Foreground").grid(row=0, column=4)
 
     def on_apply_change_button(self):
         for category_id, category in enumerate(self.categories):
@@ -112,38 +122,29 @@ class CategoriesSettingsDialog(tk.Toplevel):
         logger.debug(f'Category row {row} name set to "{text}"')
 
     def show_category(self, parent_frame, row: int, category: CategorySettings):
-        category_frm = ttk.Frame(parent_frame)
-
-        label = ttk.Label(category_frm, text=f"#{row:0{3}} - Name: ")
+        label = ttk.Label(parent_frame, text=f"#{row}: ")
         label.grid(row=row, column=0, sticky="E")
+
         name_entry_text = tk.StringVar()
         name_entry_text.set(category.name)
-        name_entry = tk.Entry(category_frm, textvariable=name_entry_text)
-        name_entry.bind('<KeyRelease>', lambda x: self.on_name_change(name_entry, row))
-        name_entry.grid(row=row, column=1, pady=5, sticky="W")
+        name_entry = tk.Entry(parent_frame, textvariable=name_entry_text, width=25)
+        name_entry.bind('<KeyRelease>', lambda x: self.on_name_change(name_entry, row - 1))
+        name_entry.grid(row=row, column=1, padx=5, pady=5)
 
-        label = ttk.Label(category_frm, text="Filter: ")
-        label.grid(row=row, column=2, sticky="E")
         filter_entry_text = tk.StringVar()
         filter_entry_text.set(category.alarm_category.regex)
-        filter_entry = tk.Entry(category_frm, textvariable=filter_entry_text)
-        filter_entry.bind('<KeyRelease>', lambda x: self.on_filter_change(filter_entry, row))
-        filter_entry.grid(row=row, column=3, pady=5, sticky="W")
+        filter_entry = tk.Entry(parent_frame, textvariable=filter_entry_text, width=30)
+        filter_entry.bind('<KeyRelease>', lambda x: self.on_filter_change(filter_entry, row - 1))
+        filter_entry.grid(row=row, column=2, padx=5, pady=5)
 
-        label = ttk.Label(category_frm, text="Background: ")
-        label.grid(row=row, column=4, sticky="E")
-        bg_button = tk.Button(category_frm,
+        bg_button = tk.Button(parent_frame,
                               text='     ',
-                              command=lambda: self.choose_color(bg_button, row, BACKGROUND),
+                              command=lambda: self.choose_color(bg_button, row - 1, BACKGROUND),
                               bg=category.alarm_category.bg_color_hex)
-        bg_button.grid(row=row, column=5, padx=5, sticky="W")
+        bg_button.grid(row=row, column=3, padx=5)
 
-        label = ttk.Label(category_frm, text="Foreground: ")
-        label.grid(row=row, column=6, sticky="E")
-        fg_button = tk.Button(category_frm,
+        fg_button = tk.Button(parent_frame,
                               text='     ',
-                              command=lambda: self.choose_color(fg_button, row, FOREGROUND),
+                              command=lambda: self.choose_color(fg_button, row - 1, FOREGROUND),
                               bg=category.alarm_category.fg_color_hex)
-        fg_button.grid(row=row, column=7, padx=5, sticky="W")
-
-        category_frm.grid(row=row)
+        fg_button.grid(row=row, column=4, padx=5)
