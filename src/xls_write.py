@@ -166,7 +166,7 @@ def write_headers(worksheet: Worksheet):
         "Utiliser chaine de caractère",
         "ID Section",
         "Dynamique",
-        "ID chaine enregistrement"
+        "ID chaine enregistrement",
         "ID Chaine",
         "Nom API (ID Chaine)",
         "Type variable (ID Chaine)",
