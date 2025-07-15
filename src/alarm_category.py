@@ -10,16 +10,13 @@ def rgb_to_hex(red, green, blue):
 
 @dataclass
 class AlarmCategory:
-    regex: str = r''
+    regex: str = field(default="")
+    _regex: str = field(init=False, repr=False)
     bg_color: Tuple[int, int, int] = (255,0,0) # Red
     fg_color: Tuple[int, int, int] = (0, 0, 0) # Black
     id: int = field(default_factory=count().__next__)
 
     pattern: re.Pattern = field(init=False, repr=False)
-
-    def __post_init__(self):
-        # Avoid using '' as default regexp as it matches everything ... Use '^$' to match nothing
-        self.pattern = re.compile(self.regex if self.regex != '' else r'^$')
 
     def is_match(self, symbol_name: str) -> bool:
         return self.pattern.search(symbol_name) is not None
@@ -31,3 +28,13 @@ class AlarmCategory:
     @property
     def fg_color_hex(self) -> str:
         return rgb_to_hex(self.fg_color[0], self.fg_color[1], self.fg_color[2])
+
+    @property
+    def regex(self) -> str:
+        return self._regex
+
+    @regex.setter
+    def regex(self, value: str):
+        self._regex = value
+        # Avoid using '' as default regexp as it matches everything ... Use '^$' to match nothing
+        self.pattern = re.compile(self._regex if self._regex != '' else r'^$')
